@@ -32,7 +32,7 @@ fi
 url="https://open.er-api.com/v6/latest/$from"
 
 # Fetch exchange rate data
-response=$(fetch "$url")
+response=$(fetch "$url") || exit 1
 
 # Check whether the API request was successful
 result=$(echo "$response" | jq -r '.result')
