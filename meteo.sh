@@ -12,8 +12,12 @@ city_url="${city// /+}"
 # Build the weather API URL
 url="https://wttr.in/${city_url}?format=j1"
 
-# Fetch weather data
-response=$(fetch "$url")
+response=$(fetch "$url") || exit 1
+
+# Stop if the API request returned no data
+if [ -z "$response" ]; then
+    die "No weather data was received." 1
+fi
 
 # Extract current weather information
 weather=$(echo "$response" | jq -r '
@@ -24,6 +28,11 @@ weather=$(echo "$response" | jq -r '
         description: .weatherDesc[0].value
     }
 ')
+
+# Check whether valid weather information was returned
+if [ "$(echo "$weather" | jq -r '.temperature // empty')" = "" ]; then
+    die "Unable to read weather information." 1
+fi
 
 # Display weather information
 echo "Weather Report: $city"
